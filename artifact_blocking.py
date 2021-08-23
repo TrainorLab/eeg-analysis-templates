@@ -55,7 +55,7 @@ def run_ab(eeg, threshold, method='window'):
         # Mix original signals (with means removed) with cleaned signals
         rxx = np.dot(old_eeg._data, old_eeg._data.T)
         ryx = np.dot(eeg._data, old_eeg._data.T)
-        W = np.dot(ryx, np.linalg.inv(rxx))
+        W = np.dot(ryx, np.linalg.pinv(rxx))
         eeg._data = W * old_eeg._data
 
     ##########
@@ -97,7 +97,7 @@ def run_ab(eeg, threshold, method='window'):
                 win_data_clean[bad] = 0
                 rxx = np.dot(win_data, win_data.T)
                 ryx = np.dot(win_data_clean, win_data.T)
-                W = np.dot(ryx, np.linalg.inv(rxx))
+                W = np.dot(ryx, np.linalg.pinv(rxx))
                 eeg._data[:, start:end] += np.dot(W, win_data)
             
             # Move window forward unless we have reached the end
