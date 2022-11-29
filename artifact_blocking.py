@@ -56,7 +56,7 @@ def run_ab(eeg, threshold, method='window'):
         rxx = np.dot(old_eeg._data, old_eeg._data.T)
         ryx = np.dot(eeg._data, old_eeg._data.T)
         W = np.dot(ryx, np.linalg.pinv(rxx))
-        eeg._data = W * old_eeg._data
+        eeg._data = np.dot(W, old_eeg._data)
 
     ##########
     #
@@ -92,7 +92,7 @@ def run_ab(eeg, threshold, method='window'):
             
             # Perform artifact blocking on window of data
             if win_data.shape[1] > win_data.shape[0]:
-                bad = win_data > threshold
+                bad = np.abs(win_data) > threshold
                 win_data_clean = win_data.copy()
                 win_data_clean[bad] = 0
                 rxx = np.dot(win_data, win_data.T)
@@ -102,7 +102,7 @@ def run_ab(eeg, threshold, method='window'):
             
             # Move window forward unless we have reached the end
             if end >= ntimes:
-                finished = True    
+                finished = True
             else:
                 start = end - int(np.fix(r * lwin / 4.))
                 end = start + lwin
