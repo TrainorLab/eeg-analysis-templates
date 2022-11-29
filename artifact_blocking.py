@@ -21,9 +21,9 @@ def run_ab(eeg, threshold, method='window'):
     """
     
     # Define window size based on specified approach
-    if len(eeg._data.shape) != 2:
-        raise ValueError('EEG data must be arranged as channels x time. The data provided was of shape %s.' % eeg._data.shape)
-    nchans, ntimes = eeg._data.shape
+    if len(eeg.data.shape) != 2:
+        raise ValueError('EEG data must be arranged as channels x time. The data provided was of shape %s.' % eeg.data.shape)
+    nchans, ntimes = eeg.data.shape
     if method == 'total':
         lwin = ntimes
     elif method == 'window':
@@ -36,9 +36,9 @@ def run_ab(eeg, threshold, method='window'):
     
     # Create copy of data with mean removed 
     old_eeg = eeg.copy()
-    ch_means = np.mean(old_eeg._data, axis=1)
+    ch_means = np.mean(old_eeg.data, axis=1)
     for i, m in enumerate(ch_means):
-        old_eeg._data[i, :] -= m
+        old_eeg.data[i, :] -= m
     
     ##########
     #
@@ -49,14 +49,14 @@ def run_ab(eeg, threshold, method='window'):
     if lwin == ntimes:
         
         # Zero out artifactual samples
-        bad = np.abs(old_eeg._data) > threshold
-        eeg._data[bad] = 0
+        bad = np.abs(old_eeg.data) > threshold
+        eeg.data[bad] = 0
         
         # Mix original signals (with means removed) with cleaned signals
-        rxx = np.dot(old_eeg._data, old_eeg._data.T)
-        ryx = np.dot(eeg._data, old_eeg._data.T)
+        rxx = np.dot(old_eeg.data, old_eeg.data.T)
+        ryx = np.dot(eeg.data, old_eeg.data.T)
         W = np.dot(ryx, np.linalg.pinv(rxx))
-        eeg._data = W * old_eeg._data
+        eeg.data = W * old_eeg.data
 
     ##########
     #
@@ -66,7 +66,7 @@ def run_ab(eeg, threshold, method='window'):
     
     else:
         
-        eeg._data.fill(0)
+        eeg.data.fill(0)
         start = 0
         end = lwin
         r = .02
@@ -88,7 +88,7 @@ def run_ab(eeg, threshold, method='window'):
             # Apply window to data
             win_data = np.zeros((nchans, len(win)))
             for i in range(nchans):
-                win_data[i, :] = win * old_eeg._data[i, start:end]
+                win_data[i, :] = win * old_eeg.data[i, start:end]
             
             # Perform artifact blocking on window of data
             if win_data.shape[1] > win_data.shape[0]:
@@ -98,7 +98,7 @@ def run_ab(eeg, threshold, method='window'):
                 rxx = np.dot(win_data, win_data.T)
                 ryx = np.dot(win_data_clean, win_data.T)
                 W = np.dot(ryx, np.linalg.pinv(rxx))
-                eeg._data[:, start:end] += np.dot(W, win_data)
+                eeg.data[:, start:end] += np.dot(W, win_data)
             
             # Move window forward unless we have reached the end
             if end >= ntimes:
