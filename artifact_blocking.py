@@ -1,5 +1,5 @@
 import numpy as np
-import scipy as sp
+import scipy.signal as sp_signal
 
 
 def run_ab(eeg, threshold, method='window'):
@@ -129,14 +129,14 @@ def tukey_window(n, r, tail='twotailed', n2=None):
     
     # Create one-sided Tukey window with only a trailing tail
     if tail == 'right':
-        win = sp.signal.tukey(n ,r)
+        win = sp_signal.tukey(n ,r)
         win[:int(np.fix(r * n / 2.))] = 1
     # Create standard Tukey window
     elif tail == 'twotailed':
-        win = sp.signal.tukey(n, r)
+        win = sp_signal.tukey(n, r)
     # Create one-sided Tukey window with only a leading tail
     elif tail == 'left':
-        win = sp.signal.tukey(n, r)[:n2]
+        win = sp_signal.tukey(n, r)[:n2]
     # Other indexes not recognized
     else:
         raise ValueError('Value of tail not recognized. Must be "twotailed", "leading", or "trailing".')
